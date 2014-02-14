@@ -1,0 +1,8 @@
+{
+    "webapp": "/path/to/your/appshim",
+    "webappDistUrl": "https://github.com/mwitte/EmberChat/archive/builds.zip",
+    "webappDistDir": "EmberChat-builds",
+    "nodeWebkitSkeleton": "",
+    "dist": "dist",
+    "src": "src"
+}

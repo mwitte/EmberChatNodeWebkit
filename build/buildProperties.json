@@ -1,0 +1,4 @@
+{
+    "webapp": "/workspace/emberchat/EmberChat/dist",
+    "nodeWebkitSkeleton": "/workspace/emberchat/node-webkit-skeleton/node-webkit.app"
+}

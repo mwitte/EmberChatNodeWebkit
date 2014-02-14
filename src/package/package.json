@@ -1,0 +1,13 @@
+{
+    "name": "EmberChat",
+    "main": "index.html",
+    "window": {
+        "icon": "images/static/icon-48.png",
+        "toolbar": false,
+        "width": 800,
+        "height": 600,
+        "frame": true,
+        "min_width": 400,
+        "min_height": 300
+    }
+}
