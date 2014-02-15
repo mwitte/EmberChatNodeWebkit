@@ -2,7 +2,11 @@
     "webapp": "/path/to/your/appshim",
     "webappDistUrl": "https://github.com/mwitte/EmberChat/archive/builds.zip",
     "webappDistDir": "EmberChat-builds",
-    "nodeWebkitSkeleton": "",
+    "nodeWebKit": {
+        "dir": "node-webkit",
+        "appName": "node-webkit.app",
+        "skeletonUrl": "https://s3.amazonaws.com/node-webkit/v0.9.1/node-webkit-v0.9.1-osx-ia32.zip"
+    },
     "dist": "dist",
     "src": "src"
 }

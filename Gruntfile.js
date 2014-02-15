@@ -76,7 +76,11 @@ module.exports = function (grunt) {
         },
         shell: {
             cpAppSkeleton: {
-                command: 'cp -r <%= buildProperties.nodeWebkitSkeleton %> dist/EmberChat.app'
+                command: 'cp -r <%= buildProperties.nodeWebKit.dir %>/<%= buildProperties.nodeWebKit.appName %> dist/EmberChat.app'
+            },
+            // unzip webkit by cmd cause grunt unzip is really slow
+            unzipNodeWebkit: {
+                command: 'unzip .tmp/node-webkit.zip -d <%= buildProperties.nodeWebKit.dir %>'
             }
         },
         curl: {
@@ -84,6 +88,10 @@ module.exports = function (grunt) {
             app: {
                 src: '<%= buildProperties.webappDistUrl %>',
                 dest: '.tmp/appdist.zip'
+            },
+            nodeWebkit: {
+                src: '<%= buildProperties.nodeWebKit.skeletonUrl %>',
+                dest: '.tmp/node-webkit.zip'
             }
         },
         unzip: {
@@ -124,6 +132,23 @@ module.exports = function (grunt) {
         }
     });
 
+    /**
+     * Copy the webapp from set directory, if not found loads last build from github
+     */
+    grunt.registerTask('requireNodeWebkit', function(target) {
+        var fs = require('fs');
+        if (fs.existsSync(buildProperties.nodeWebKit.dir)) {
+            console.log('Got node-webkit from local copy: ./' + buildProperties.nodeWebKit.dir);
+        }else{
+            console.info('node-webkit not found under: ./' + buildProperties.nodeWebKit.dir);
+            console.info('You should specify the path to the app dist');
+            console.info('Create a build/buildProperties.json and define the app dir.');
+            console.info('Look into the buildDefaultProperties.json for help.');
+            console.log('Fallback: Load app from ' + buildProperties.nodeWebKit.skeletonUrl);
+            grunt.task.run(['curl:nodeWebkit', 'shell:unzipNodeWebkit', 'clean:tmp']);
+        }
+    });
+
     grunt.registerTask('server', function (target) {
         grunt.task.run([
             'build',
@@ -136,6 +161,7 @@ module.exports = function (grunt) {
         'copy:package',
         'requireApp',
         'zip:app',
+        'requireNodeWebkit',
         'shell:cpAppSkeleton',
         'copy:nwapp',
         'copy:app'
