@@ -6,6 +6,16 @@ var propertyMerger = new MergeBuildPropertiesClass('buildDefaultProperties.json'
 // LOAD AND MERGE BUILD PROPERTIES
 var buildProperties = propertyMerger.merge();
 
+var applicationScripts = [
+    "libs/nw-desktop-notifications.js",
+    "backside.js"
+];
+for(var i=0; i<applicationScripts.length; i++){
+    applicationScripts[i] = '<script src="' + applicationScripts[i] + '"></script>'
+}
+applicationScripts = applicationScripts.join('\n');
+
+
 module.exports = function (grunt) {
     // show elapsed time at the end
     require('time-grunt')(grunt);
@@ -111,6 +121,22 @@ module.exports = function (grunt) {
                 src: ['<%= buildProperties.dist %>/**/*'],
                 dest: '<%= buildProperties.dist %>/app.nw'
             }
+        },
+        replace: {
+            libs: {
+                options: {
+                    patterns: [
+                        {
+                            match: '/<!---NativeApplicationLibs--->/g',
+                            replacement: applicationScripts,
+                            expression: true
+                        }
+                    ]
+                },
+                files: [
+                    {src: '<%= buildProperties.dist %>/index.html', dest: '<%= buildProperties.dist %>/index.html'}
+                ]
+            }
         }
     });
 
@@ -156,10 +182,23 @@ module.exports = function (grunt) {
         ]);
     });
 
+    grunt.registerTask('debugBuild', [
+        'clean:dist',
+        'copy:package',
+        'requireApp',
+        'replace:libs',
+        'zip:app',
+        'requireNodeWebkit',
+        'shell:cpAppSkeleton',
+        'copy:nwapp',
+        'copy:app'
+    ]);
+
     grunt.registerTask('build', [
         'clean:dist',
         'copy:package',
         'requireApp',
+        'replace:libs',
         'zip:app',
         'requireNodeWebkit',
         'shell:cpAppSkeleton',
