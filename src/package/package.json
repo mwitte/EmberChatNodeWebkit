@@ -1,5 +1,6 @@
 {
     "name": "EmberChat",
+    "version": "0.0.1",
     "main": "index.html",
     "window": {
         "icon": "images/static/icon-48.png",

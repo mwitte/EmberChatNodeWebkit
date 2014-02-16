@@ -93,7 +93,9 @@
 		var y = screen.availTop;
 		var x = WINDOW_WIDTH;
 		win.moveTo(getXPositionOfNotificationWindow(win),y);
-		//win.show();
+        if(process.platform !== 'darwin'){
+            win.show();
+        }
 		win.NOTIFICATION_IS_SHOWING = true;
 		if(document.hasFocus()){
 			//win.blur();
@@ -122,7 +124,9 @@
 					animate();
 				}
 				else{
-					//win.hide();
+                    if(process.platform !== 'darwin'){
+                        win.hide();
+                    }
 					if(callback){
 						callback();
 					}

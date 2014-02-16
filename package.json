@@ -1,6 +1,6 @@
 {
   "name": "emberchat-node-webkit",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "dependencies": {},
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -12,7 +12,8 @@
     "grunt-curl": "~1.4.0",
     "grunt-zip": "~0.12.0",
     "grunt-shell": "~0.6.4",
-    "grunt-replace": "~0.6.2"
+    "grunt-replace": "~0.6.2",
+    "grunt-node-webkit-builder": "~0.1.17"
   },
   "engines": {
     "node": ">=0.8.0"
