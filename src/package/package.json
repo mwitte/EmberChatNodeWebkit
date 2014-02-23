@@ -1,6 +1,6 @@
 {
     "name": "EmberChat",
-    "version": "0.0.1",
+    "version": "@@@package_version",
     "main": "index.html",
     "window": {
         "icon": "images/static/icon-48.png",
@@ -12,7 +12,6 @@
         "min_height": 400
     },
     "webkit": {
-        "plugin": true,
-        "page-cache": false
+        "plugin": false
     }
 }

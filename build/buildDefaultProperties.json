@@ -5,8 +5,10 @@
     "nodeWebKit": {
         "dir": "node-webkit",
         "appName": "node-webkit.app",
-        "skeletonUrl": "https://s3.amazonaws.com/node-webkit/v0.9.1/node-webkit-v0.9.1-osx-ia32.zip"
+        "skeletonUrl": "https://s3.amazonaws.com/node-webkit/v0.9.2/node-webkit-v0.9.2-osx-ia32.zip"
     },
+    "releaseTargetDir": "webkitbuilds/releases/EmberChat",
+    "macOsAppName": "EmberChat.app",
     "dist": "dist",
     "src": "src"
 }

@@ -43,7 +43,15 @@ module.exports = function (grunt) {
                     ]
                 }]
             },
-            tmp: '.tmp'
+            tmp: '.tmp',
+            macRelease: {
+                files: [{
+                    dot: true,
+                    src: [
+                        '<%= buildProperties.releaseTargetDir %>/mac/<%= buildProperties.macOsAppName %>/Contents/Resources/Credits.html'
+                    ]
+                }]
+            }
         },
         // Put files not handled in other tasks here
         copy: {
@@ -56,22 +64,13 @@ module.exports = function (grunt) {
                     src: '**/*'
                 }]
             },
-            app: {
+            macAppAdjustments: {
                 files: [{
                     expand: true,
                     dot: true,
                     cwd: '<%= buildProperties.src %>/app',
-                    dest: '<%= buildProperties.dist %>/EmberChat.app',
+                    dest: '<%= buildProperties.releaseTargetDir %>/mac/<%= buildProperties.macOsAppName %>',
                     src: '**/*'
-                }]
-            },
-            nwapp: {
-                files: [{
-                    expand: true,
-                    dot: true,
-                    cwd: '<%= buildProperties.dist %>',
-                    dest: '<%= buildProperties.dist %>/EmberChat.app/Contents/Resources',
-                    src: 'app.nw'
                 }]
             },
             webapp: {
@@ -85,12 +84,29 @@ module.exports = function (grunt) {
             }
         },
         shell: {
-            cpAppSkeleton: {
-                command: 'cp -r <%= buildProperties.nodeWebKit.dir %>/<%= buildProperties.nodeWebKit.appName %> dist/EmberChat.app'
+            packMacVersion: {
+                command: 'zip -r ../../../EmberChat.MacOS-<%= pkg.version %>.zip <%= buildProperties.macOsAppName %>',
+                options: {
+                    execOptions: {
+                        cwd: '<%= buildProperties.releaseTargetDir %>/mac'
+                    }
+                }
             },
-            // unzip webkit by cmd cause grunt unzip is really slow
-            unzipNodeWebkit: {
-                command: 'unzip .tmp/node-webkit.zip -d <%= buildProperties.nodeWebKit.dir %>'
+            packLinux64Version: {
+                command: 'zip -r ../../../EmberChat.Linux64-<%= pkg.version %>.zip EmberChat',
+                options: {
+                    execOptions: {
+                        cwd: '<%= buildProperties.releaseTargetDir %>/linux64'
+                    }
+                }
+            },
+            packWindowsVersion: {
+                command: 'zip -r ../../../EmberChat.Windows-<%= pkg.version %>.zip EmberChat',
+                options: {
+                    execOptions: {
+                        cwd: '<%= buildProperties.releaseTargetDir %>/win'
+                    }
+                }
             }
         },
         curl: {
@@ -98,10 +114,6 @@ module.exports = function (grunt) {
             app: {
                 src: '<%= buildProperties.webappDistUrl %>',
                 dest: '.tmp/appdist.zip'
-            },
-            nodeWebkit: {
-                src: '<%= buildProperties.nodeWebKit.skeletonUrl %>',
-                dest: '.tmp/node-webkit.zip'
             }
         },
         unzip: {
@@ -113,13 +125,6 @@ module.exports = function (grunt) {
                     // remove directory
                     return filepath.replace(buildProperties.webappDistDir + '/', '');
                 }
-            }
-        },
-        zip: {
-            app: {
-                cwd: '<%= buildProperties.dist %>/',
-                src: ['<%= buildProperties.dist %>/**/*'],
-                dest: '<%= buildProperties.dist %>/app.nw'
             }
         },
         replace: {
@@ -136,15 +141,33 @@ module.exports = function (grunt) {
                 files: [
                     {src: '<%= buildProperties.dist %>/index.html', dest: '<%= buildProperties.dist %>/index.html'}
                 ]
+            },
+            version: {
+                options: {
+                    patterns: [
+                        {
+                            match: '/@@@package_version/g',
+                            replacement: '<%= pkg.version %>',
+                            expression: true
+                        }
+                    ]
+                },
+                files: [
+                    {src: '<%= buildProperties.dist %>/package.json', dest: '<%= buildProperties.dist %>/package.json'},
+                    {
+                        src: '<%= buildProperties.releaseTargetDir %>/mac/<%= buildProperties.macOsAppName %>/Contents/Info.plist',
+                        dest: '<%= buildProperties.releaseTargetDir %>/mac/<%= buildProperties.macOsAppName %>/Contents/Info.plist'
+                    }
+                ]
             }
         },
         nodewebkit: {
             options: {
-                version: '0.9.0',
+                version: '0.9.2',
                 build_dir: './webkitbuilds', // Where the build version of my node-webkit app is saved
-                mac: false, // We want to build it for mac
+                mac: true, // We want to build it for mac
                 win: true, // We want to build it for win
-                linux32: true, // We don't need linux32
+                linux32: false, // We don't need linux32
                 linux64: true // We don't need linux64
             },
             src: ['./dist/**/*'] // Your node-wekit app
@@ -169,23 +192,6 @@ module.exports = function (grunt) {
         }
     });
 
-    /**
-     * Copy the webapp from set directory, if not found loads last build from github
-     */
-    grunt.registerTask('requireNodeWebkit', function(target) {
-        var fs = require('fs');
-        if (fs.existsSync(buildProperties.nodeWebKit.dir)) {
-            console.log('Got node-webkit from local copy: ./' + buildProperties.nodeWebKit.dir);
-        }else{
-            console.info('node-webkit not found under: ./' + buildProperties.nodeWebKit.dir);
-            console.info('You should specify the path to the app dist');
-            console.info('Create a build/buildProperties.json and define the app dir.');
-            console.info('Look into the buildDefaultProperties.json for help.');
-            console.log('Fallback: Load app from ' + buildProperties.nodeWebKit.skeletonUrl);
-            grunt.task.run(['curl:nodeWebkit', 'shell:unzipNodeWebkit', 'clean:tmp']);
-        }
-    });
-
     grunt.registerTask('server', function (target) {
         grunt.task.run([
             'build',
@@ -193,16 +199,17 @@ module.exports = function (grunt) {
         ]);
     });
 
-    grunt.registerTask('debugBuild', [
-        'clean:dist',
-        'copy:package',
-        'requireApp',
-        'replace:libs',
-        'zip:app',
-        'requireNodeWebkit',
-        'shell:cpAppSkeleton',
-        'copy:nwapp',
-        'copy:app'
+    grunt.registerTask('makeVersion', [
+        'build',
+        'shell:packMacVersion',
+        'shell:packLinux64Version',
+        'shell:packWindowsVersion'
+    ]);
+
+    grunt.registerTask('MacOSAdjustments', [
+        'copy:macAppAdjustments',
+        'replace:version',
+        'clean:macRelease'
     ]);
 
     grunt.registerTask('build', [
@@ -210,11 +217,9 @@ module.exports = function (grunt) {
         'copy:package',
         'requireApp',
         'replace:libs',
-        'zip:app',
-        'requireNodeWebkit',
-        'shell:cpAppSkeleton',
-        'copy:nwapp',
-        'copy:app'
+        'replace:version',
+        'nodewebkit',
+        'MacOSAdjustments'
     ]);
 
     grunt.registerTask('default', [

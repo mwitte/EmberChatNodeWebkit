@@ -1,6 +1,6 @@
-var GUI = require('nw.gui');
+var gui = require('nw.gui');
 
 // close application if main window got closed
-GUI.Window.get().on('close', function(){
-    GUI.App.quit();
+gui.Window.get().on('close', function(){
+    gui.App.quit();
 });
