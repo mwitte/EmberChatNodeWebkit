@@ -1,5 +1,7 @@
 'use strict';
 
+var nodeWebKitVersion = '0.9.2';
+
 var MergeBuildPropertiesClass = require('./build/MergeBuildProperties');
 var propertyMerger = new MergeBuildPropertiesClass('buildDefaultProperties.json', 'buildProperties.json');
 
@@ -27,6 +29,7 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
         // build properties("buildDefaultProperties.json" merged with "buildProperties.json")
         buildProperties: buildProperties,
+        nodeWebKitVersion: nodeWebKitVersion,
 
         watch: {
             src: {
@@ -163,7 +166,7 @@ module.exports = function (grunt) {
         },
         nodewebkit: {
             options: {
-                version: '0.9.2',
+                version: '<%= nodeWebKitVersion %>',
                 build_dir: './webkitbuilds', // Where the build version of my node-webkit app is saved
                 mac: true, // We want to build it for mac
                 win: true, // We want to build it for win
